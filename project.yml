@@ -20,7 +20,7 @@ targets:
       properties:
         CFBundleDisplayName: Station Card
         UILaunchScreen: {}
-        UIAppFonts: [Inter.ttf, LightTextTrial-Light.otf, LightTextTrial-Regular.otf, LightTextTrial-Bold.otf]
+        UIAppFonts: [Inter.ttf, LightTextTrial-Light.otf, LightTextTrial-Regular.otf, LightTextTrial-Bold.otf, LibreFranklin-SemiBold.ttf]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIViewControllerBasedStatusBarAppearance: true
         UIRequiresFullScreen: true

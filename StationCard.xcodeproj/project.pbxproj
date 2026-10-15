@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0470D42CD5B7D62B61E6C33E /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87191338D1F2FD769A5C7BDB /* HomeScreen.swift */; };
+		3B61F0A2C84D5E7F9A0B1C2D /* OnboardingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C72E1B3D95E6F8A0B1C2D3E /* OnboardingScreen.swift */; };
 		10B7CD830465EFCC6BA514F1 /* arch-night@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1A2A6BB34356286A3DE1706E /* arch-night@3x.png */; };
 		21B407FBBFDB50E66F9444CC /* tile-live.png in Resources */ = {isa = PBXBuildFile; fileRef = 19C5F78583165B4C563BC1B0 /* tile-live.png */; };
 		2E8DDBC179AE7A04BD93F0C1 /* tile-seat-4.png in Resources */ = {isa = PBXBuildFile; fileRef = EB99918E1ADE3B9CA21E549A /* tile-seat-4.png */; };
@@ -30,6 +31,8 @@
 		D56639BBFA89296F31C986D1 /* arch-sunset@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B0E5816B8D1E4C7CFE371E3 /* arch-sunset@3x.png */; };
 		E1A8A279D72C146A04843DD3 /* arch-evening@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F8C66B808AF36256E7A3BB22 /* arch-evening@3x.png */; };
 		E1C414200E12E816E52EA66F /* Inter.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8101512EE5ED4CBE449CAF6E /* Inter.ttf */; };
+		7D83F2C4EA6F7A9B1C2D3E4F /* LibreFranklin-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9E94A3D5FB7A8B0C2D3E4F5A /* LibreFranklin-SemiBold.ttf */; };
+		AFA5B4E60C8B9C1D3E4F5A6B /* google-g.png in Resources */ = {isa = PBXBuildFile; fileRef = C0B6C5F71D9CAD2E4F5A6B7C /* google-g.png */; };
 		EE7079EF1A1307333C0DCDFC /* LightTextTrial-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4C3479B5524CDFCE51160948 /* LightTextTrial-Bold.otf */; };
 /* End PBXBuildFile section */
 
@@ -48,7 +51,10 @@
 		7B0E5816B8D1E4C7CFE371E3 /* arch-sunset@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arch-sunset@3x.png"; sourceTree = "<group>"; };
 		7B7FFDADF60BA518E70F0F5E /* placeholder-evening@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "placeholder-evening@2x.png"; sourceTree = "<group>"; };
 		8101512EE5ED4CBE449CAF6E /* Inter.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Inter.ttf; sourceTree = "<group>"; };
+		9E94A3D5FB7A8B0C2D3E4F5A /* LibreFranklin-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-SemiBold.ttf"; sourceTree = "<group>"; };
+		C0B6C5F71D9CAD2E4F5A6B7C /* google-g.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "google-g.png"; sourceTree = "<group>"; };
 		87191338D1F2FD769A5C7BDB /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		5C72E1B3D95E6F8A0B1C2D3E /* OnboardingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScreen.swift; sourceTree = "<group>"; };
 		931D28208BB366BC6067946C /* StationCardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationCardApp.swift; sourceTree = "<group>"; };
 		BEA44C647D9F87110246DDDC /* TrainWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainWebView.swift; sourceTree = "<group>"; };
 		CF37B37AC5CB1AF768D8EC85 /* LightTextTrial-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LightTextTrial-Regular.otf"; sourceTree = "<group>"; };
@@ -75,6 +81,7 @@
 		55185EC171407C95628D492C /* figma */ = {
 			isa = PBXGroup;
 			children = (
+				C0B6C5F71D9CAD2E4F5A6B7C /* google-g.png */,
 				19C5F78583165B4C563BC1B0 /* tile-live.png */,
 				17233D9A75D261936145F70E /* tile-seat-1.png */,
 				3917300DF6FA59E76FBD2227 /* tile-seat-2.png */,
@@ -94,6 +101,7 @@
 				7B0E5816B8D1E4C7CFE371E3 /* arch-sunset@3x.png */,
 				2353496A62BEC103B387906F /* Assets.xcassets */,
 				8101512EE5ED4CBE449CAF6E /* Inter.ttf */,
+				9E94A3D5FB7A8B0C2D3E4F5A /* LibreFranklin-SemiBold.ttf */,
 				4C3479B5524CDFCE51160948 /* LightTextTrial-Bold.otf */,
 				58E8EB1A82360B47BE38C539 /* LightTextTrial-Light.otf */,
 				CF37B37AC5CB1AF768D8EC85 /* LightTextTrial-Regular.otf */,
@@ -119,6 +127,7 @@
 			children = (
 				47AEE305E8FF360657ED2A5B /* ContentView.swift */,
 				87191338D1F2FD769A5C7BDB /* HomeScreen.swift */,
+				5C72E1B3D95E6F8A0B1C2D3E /* OnboardingScreen.swift */,
 				931D28208BB366BC6067946C /* StationCardApp.swift */,
 				BEA44C647D9F87110246DDDC /* TrainWebView.swift */,
 			);
@@ -185,6 +194,7 @@
 			files = (
 				AA375D6F592D723DDC84A819 /* Assets.xcassets in Resources */,
 				E1C414200E12E816E52EA66F /* Inter.ttf in Resources */,
+				7D83F2C4EA6F7A9B1C2D3E4F /* LibreFranklin-SemiBold.ttf in Resources */,
 				EE7079EF1A1307333C0DCDFC /* LightTextTrial-Bold.otf in Resources */,
 				46B6E72C3132D8241CD39D19 /* LightTextTrial-Light.otf in Resources */,
 				3CF3CE150955CB8A587AAFF0 /* LightTextTrial-Regular.otf in Resources */,
@@ -196,6 +206,7 @@
 				A1E6430BE0B9B9CD50777408 /* placeholder-evening@2x.png in Resources */,
 				484788BFE8AA1D946FD47C8C /* placeholder-night@2x.png in Resources */,
 				3C4F5BAC8947F5F9981ABDEE /* placeholder-sunset@2x.png in Resources */,
+				AFA5B4E60C8B9C1D3E4F5A6B /* google-g.png in Resources */,
 				21B407FBBFDB50E66F9444CC /* tile-live.png in Resources */,
 				D2786784A9C1739BB7ABA59E /* tile-seat-1.png in Resources */,
 				35B8657813001311717F7451 /* tile-seat-2.png in Resources */,
@@ -215,6 +226,7 @@
 			files = (
 				85EF130C6F31EB5125F04841 /* ContentView.swift in Sources */,
 				0470D42CD5B7D62B61E6C33E /* HomeScreen.swift in Sources */,
+				3B61F0A2C84D5E7F9A0B1C2D /* OnboardingScreen.swift in Sources */,
 				AF0D76887042C7D781FC79BE /* StationCardApp.swift in Sources */,
 				49EC984D06D2681A6DBEFDD5 /* TrainWebView.swift in Sources */,
 			);

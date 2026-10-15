@@ -45,8 +45,18 @@ enum Cards {
     ]
 }
 
+/// Shows the first-launch screen once (Figma 306:129); after "Sign in with Google" the home screen takes over
+/// and the flag persists, so later launches open straight on the home screen.
 struct ContentView: View {
-    var body: some View { HomeScreen() }
+    @AppStorage("onboardingDone") private var onboardingDone = false
+
+    var body: some View {
+        if onboardingDone {
+            HomeScreen()
+        } else {
+            OnboardingScreen { onboardingDone = true }
+        }
+    }
 }
 
 /// The earlier stacked-cards layout, kept for reference.
