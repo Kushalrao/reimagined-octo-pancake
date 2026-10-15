@@ -3,3 +3,7 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 .DS_Store
+tools/archout/
+tools/phout/
+tools/liv/
+tools/livery-sheet.png

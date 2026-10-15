@@ -1,0 +1,388 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Stone arch</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { display: block; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
+
+const Q = new URLSearchParams(location.search);
+const PHASE = Q.get('phase') || 'day';
+const NIGHT = PHASE === 'night', EVENING = PHASE === 'evening', SUNSET = PHASE === 'sunset';
+const BG = Q.get('bg') === 'white' ? 0xffffff : 0x000000;   // matte passes: render on black and on white
+const AO = Q.get('ao') !== '0';
+
+// ---------------------------------------------------------------- renderer / scene
+const W = innerWidth, H = innerHeight;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(W, H);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = NIGHT ? 0.7 : SUNSET ? 1.0 : EVENING ? 1.0 : 1.14;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(BG);
+
+// the whole arch spans x ±1.66, y −1.18 … +1.61 (intrados radius = 1)
+const camera = new THREE.PerspectiveCamera(14, W / H, 1, 100);
+if (Q.get('view') === 'cap') { camera.position.set(-1.30, -0.55, 5.2); camera.lookAt(-1.30, -0.72, 0); }
+else { camera.position.set(0, 1.35, 15.5); camera.lookAt(0, 0.21, 0); }
+
+// ---------------------------------------------------------------- lights (same palette as the card scene)
+scene.add(new THREE.HemisphereLight(
+  NIGHT ? 0x3a4c74 : SUNSET ? 0xffb08c : EVENING ? 0xf7b89a : 0xe4ecf8,
+  NIGHT ? 0x10131c : SUNSET ? 0x5a4458 : EVENING ? 0x5a4a44 : 0x8a8276,
+  NIGHT ? 0.9 : SUNSET ? 1.1 : EVENING ? 1.1 : 1.25));
+const sun = new THREE.DirectionalLight(
+  NIGHT ? 0x9fb3e6 : SUNSET ? 0xff8c4a : EVENING ? 0xffc091 : 0xfff3dd,
+  NIGHT ? 1.1 : SUNSET ? 1.6 : EVENING ? 1.8 : 1.9);
+sun.position.set(SUNSET ? -7 : -4.5, SUNSET ? 2.5 : NIGHT || EVENING ? 4 : 7, 9);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -2.2, right: 2.2, top: 2.2, bottom: -2.2, near: 1, far: 30 });
+sun.shadow.bias = -0.00025;
+sun.shadow.normalBias = 0.004;
+sun.shadow.radius = 6;
+scene.add(sun, sun.target);
+const fill = new THREE.DirectionalLight(NIGHT ? 0x4a5a80 : SUNSET ? 0xc088b0 : EVENING ? 0xffd0b0 : 0xe6eeff, NIGHT ? 0.25 : 0.45);
+fill.position.set(6, 1.5, 7);
+scene.add(fill);
+
+// ---------------------------------------------------------------- material: pale limestone, fine speckle
+function speckle() {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f6f5f2'; g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 14000; i++) {
+    const v = 232 + Math.random() * 24;
+    g.fillStyle = `rgba(${v - 20},${v - 22},${v - 26},${0.25 + Math.random() * 0.35})`;
+    g.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 1.5, 1 + Math.random() * 1.5);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 3); t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const stone = new THREE.MeshStandardMaterial({ color: 0xf4f3f0, roughness: 0.82, metalness: 0, map: speckle() });
+const stoneFlat = stone;   // same look everywhere
+
+const root = new THREE.Group();
+scene.add(root);
+let cur;   // current parent for the capital assemblies
+function add(geom, parent = cur || root, mat = stone) {
+  const g = geom.index ? geom.toNonIndexed() : geom;
+  g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat);
+  m.castShadow = m.receiveShadow = true;
+  parent.add(m);
+  return m;
+}
+// smooth-shaded variant (bell, volutes, leaves)
+function addSmooth(geom, parent = cur || root, mat = stone) {
+  const m = new THREE.Mesh(geom, mat);
+  m.castShadow = m.receiveShadow = true;
+  parent.add(m);
+  return m;
+}
+
+// ---------------------------------------------------------------- 1. the archivolt: a closed (r, z) profile swept along the half circle
+// radii in units of the intrados radius; z grows towards the viewer
+function sweep(profile, a0, a1, segs) {
+  const pos = [], uv = [];
+  const n = profile.length;
+  for (let i = 0; i < segs; i++) {
+    const t0 = a0 + (a1 - a0) * i / segs, t1 = a0 + (a1 - a0) * (i + 1) / segs;
+    for (let j = 0; j < n; j++) {
+      const [r0, z0] = profile[j], [r1, z1] = profile[(j + 1) % n];
+      const A = [r0 * Math.cos(t0), r0 * Math.sin(t0), z0], B = [r1 * Math.cos(t0), r1 * Math.sin(t0), z1];
+      const C = [r1 * Math.cos(t1), r1 * Math.sin(t1), z1], D = [r0 * Math.cos(t1), r0 * Math.sin(t1), z0];
+      pos.push(...A, ...C, ...B, ...A, ...D, ...C);
+      const u0 = t0 * 2, u1 = t1 * 2;
+      uv.push(u0, r0, u1, r1, u0, r1, u0, r0, u1, r0, u1, r1);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  return g;
+}
+const BACK = -0.42;
+// outer fascia + fillets, coffer-band floor, torus, plain band, fillet, inner band, intrados
+const RING = [
+  [1.280, BACK], [1.280, 0.150], [1.254, 0.150], [1.254, 0.118], [1.232, 0.118], [1.232, 0.060],  // outer fascia, step, coffer floor
+  [1.128, 0.060], [1.128, 0.140], [1.106, 0.140], [1.106, 0.100],                                  // raised rim under the coffers
+  [1.058, 0.100], [1.058, 0.138], [1.044, 0.138], [1.044, 0.100],                                  // mid fillet
+  [1.014, 0.100], [1.014, 0.130], [1.000, 0.130], [1.000, BACK],                                   // inner fillet + intrados
+];
+add(sweep(RING, 0, Math.PI, 240));
+
+// ---------------------------------------------------------------- 2. coffers: chamfered radial ribs on the band floor, plaque at the crown
+const BAND_IN = 1.128, BAND_OUT = 1.232;
+function rib(theta, halfW) {                 // trapezoid section (wider at the base), extruded radially
+  const s = new THREE.Shape();
+  s.moveTo(-halfW - 0.006, 0); s.lineTo(halfW + 0.006, 0); s.lineTo(halfW, 0.050); s.lineTo(-halfW, 0.050); s.closePath();
+  const g = new THREE.ExtrudeGeometry(s, { depth: BAND_OUT - BAND_IN, bevelEnabled: false });
+  // extrude goes along +z; re-map: local x -> tangential, local y -> z (height), local z -> radial
+  g.rotateX(-Math.PI / 2);                   // y -> -z? we want height along world z: rotate so local y becomes z
+  // after rotateX(-90°): (x, y, z) -> (x, z, -y)... compute explicitly instead
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);   // after rotation: x tangential, y radial(=old z), z = -height
+    const rad = BAND_IN + y, h = -z;
+    const ang = theta + x / rad;
+    p.setXYZ(i, rad * Math.cos(ang), rad * Math.sin(ang), 0.060 + h);
+  }
+  return g;
+}
+const PLAQUE_HALF = 0.235;                   // radians: plaque at the crown
+const BLOCK_ANG = THREE.MathUtils.degToRad(37), BLOCK_HALF = THREE.MathUtils.degToRad(8.6);
+const PITCH = THREE.MathUtils.degToRad(4.6);
+function cofferRun(a0, a1) {                 // ribs splitting [a0,a1] into equal coffers, ribs at both ends
+  const n = Math.max(1, Math.round((a1 - a0) / PITCH));
+  for (let i = 0; i <= n; i++) add(rib(a0 + (a1 - a0) * i / n, 0.007));
+}
+const SPRING_GAP = THREE.MathUtils.degToRad(2.5);
+cofferRun(SPRING_GAP, BLOCK_ANG - BLOCK_HALF);
+cofferRun(BLOCK_ANG + BLOCK_HALF, Math.PI / 2 - PLAQUE_HALF);
+cofferRun(Math.PI / 2 + PLAQUE_HALF, Math.PI - BLOCK_ANG - BLOCK_HALF);
+cofferRun(Math.PI - BLOCK_ANG + BLOCK_HALF, Math.PI - SPRING_GAP);
+// crown plaque: smooth raised panel with a bevelled lip
+add(sweep([[BAND_OUT - 0.008, 0.060], [BAND_OUT - 0.008, 0.112], [BAND_OUT - 0.020, 0.122], [BAND_IN + 0.020, 0.122], [BAND_IN + 0.008, 0.112], [BAND_IN + 0.008, 0.060]],
+  Math.PI / 2 - PLAQUE_HALF - 0.006, Math.PI / 2 + PLAQUE_HALF + 0.006, 40));
+// thin sunken border inside each coffer floor: a shallow inner frame line (reads as the bevelled pocket)
+function pocketFrame(a0, a1) {
+  const n = Math.max(1, Math.round((a1 - a0) / PITCH));
+  for (let i = 0; i < n; i++) {
+    const b0 = a0 + (a1 - a0) * i / n + 0.007 / 1.18 + 0.008, b1 = a0 + (a1 - a0) * (i + 1) / n - 0.007 / 1.18 - 0.008;
+    add(sweep([[BAND_OUT - 0.014, 0.060], [BAND_OUT - 0.014, 0.070], [BAND_OUT - 0.022, 0.070], [BAND_OUT - 0.022, 0.060]], b0, b1, 6));
+    add(sweep([[BAND_IN + 0.022, 0.060], [BAND_IN + 0.022, 0.070], [BAND_IN + 0.014, 0.070], [BAND_IN + 0.014, 0.060]], b0, b1, 6));
+  }
+}
+pocketFrame(SPRING_GAP, BLOCK_ANG - BLOCK_HALF);
+pocketFrame(BLOCK_ANG + BLOCK_HALF, Math.PI / 2 - PLAQUE_HALF);
+pocketFrame(Math.PI / 2 + PLAQUE_HALF, Math.PI - BLOCK_ANG - BLOCK_HALF);
+pocketFrame(Math.PI - BLOCK_ANG + BLOCK_HALF, Math.PI - SPRING_GAP);
+
+// ---------------------------------------------------------------- 3. chamfered blocks (voussoirs + imposts)
+function chamferBlock(w, h, depth, bevel, bevelDepth) {
+  const s = new THREE.Shape();
+  const hw = w / 2 - bevel, hh = h / 2 - bevel;
+  s.moveTo(-hw, -hh); s.lineTo(hw, -hh); s.lineTo(hw, hh); s.lineTo(-hw, hh); s.closePath();
+  const g = new THREE.ExtrudeGeometry(s, { depth: depth - bevelDepth, bevelEnabled: true, bevelThickness: bevelDepth, bevelSize: bevel, bevelSegments: 1 });
+  g.translate(0, 0, -(depth - bevelDepth) + 0);   // front face (the bevelled end) sits at z = +bevelDepth
+  return g;
+}
+// voussoir blocks at ±37°, radial, projecting past the fascia
+for (const side of [1, -1]) {
+  const ang = side > 0 ? BLOCK_ANG : Math.PI - BLOCK_ANG;
+  const g = chamferBlock(0.27, 0.185, 0.78, 0.038, 0.06);   // w along radius, h tangential
+  g.rotateZ(ang);
+  const rc = (1.10 + 1.39) / 2;
+  g.translate(rc * Math.cos(ang), rc * Math.sin(ang), 0.24);
+  add(g);
+  // a thinner, taller backing plate behind the block (the stepped slab in the reference)
+  const b = new THREE.BoxGeometry(0.30, 0.22, 0.34); b.rotateZ(ang); b.translate(rc * Math.cos(ang), rc * Math.sin(ang), 0.02);
+  add(b);
+}
+// imposts: horizontal chamfered blocks at the springing
+for (const side of [1, -1]) {
+  const g = chamferBlock(0.40, 0.13, 0.78, 0.035, 0.06);
+  g.translate(side * 1.14, -0.065, 0.24);
+  add(g);
+  const b = new THREE.BoxGeometry(0.44, 0.17, 0.34); b.translate(side * 1.14, -0.08, 0.02); add(b);
+}
+
+// ---------------------------------------------------------------- 4. pier head with sunken panel, abacus, capital, astragal, shaft stub
+const PIER_EXT = 0.42;   // extra pier height below the impost (the capital group drops by the same amount)
+function panelledPier(side) {
+  const x = side * 1.14, E = PIER_EXT;
+  const body = new THREE.BoxGeometry(0.28, 0.14 + E, 0.60); body.translate(x, -0.235 - E / 2, 0.0); add(body);
+  // sunken panel: frame ring (two thin boxes) around a recessed floor
+  const fr = (w, h, cx, cy) => { const b = new THREE.BoxGeometry(w, h, 0.03); b.translate(cx, cy, 0.315); add(b); };
+  fr(0.20, 0.012, x, -0.188); fr(0.20, 0.012, x, -0.282 - E); fr(0.012, 0.106 + E, x - 0.094, -0.235 - E / 2); fr(0.012, 0.106 + E, x + 0.094, -0.235 - E / 2);
+  const floor = new THREE.BoxGeometry(0.176, 0.082 + E, 0.012); floor.translate(x, -0.235 - E / 2, 0.312); add(floor);
+}
+panelledPier(1); panelledPier(-1);
+
+function abacus(side) {
+  const x = side * 1.14, top = -0.305;
+  const slab = new THREE.BoxGeometry(0.66, 0.040, 0.66); slab.translate(x, top - 0.020, 0.02); add(slab);
+  // cyma: chamfered moulding narrowing downward
+  const s = new THREE.Shape(); s.moveTo(-0.35, 0); s.lineTo(0.35, 0); s.lineTo(0.30, -0.055); s.lineTo(-0.30, -0.055); s.closePath();
+  const cy = new THREE.ExtrudeGeometry(s, { depth: 0.60, bevelEnabled: false }); cy.translate(0, 0, -0.30); cy.translate(x, top - 0.040, 0.02); add(cy);
+  const fillet = new THREE.BoxGeometry(0.58, 0.028, 0.56); fillet.translate(x, top - 0.109, 0.02); add(fillet);
+  // fleuron: central flower boss under the abacus
+  const fl = new THREE.Group(); fl.position.set(x, top - 0.105, 0.335); cur.add(fl);
+  addSmooth(new THREE.SphereGeometry(0.028, 20, 14), fl);
+  for (let i = 0; i < 7; i++) {
+    const pet = leaf({ L: 0.11, Wm: 0.036, lobes: 2, curl: 0.5, bulge: 0.015, lean: 0.25, cup: 0.5, segs: [12, 18] });
+    pet.rotateZ(Math.PI + (i - 3) * 0.42); pet.translate(0, 0, -0.02);
+    addSmooth(pet, fl, leafMat);
+  }
+}
+
+// parametric acanthus leaf: rises along +y, bulges and curls forward (+z); width profile with lobes and notches
+function leaf({ L = 0.4, Wm = 0.16, lobes = 4, curl = 1.9, bulge = 0.06, lean = -0.12, cup = 0.35, segs = [26, 60] }) {
+  const [NU, NV] = segs;
+  // spine: integrate angle phi(v) measured from +y towards +z
+  const spine = [], tang = [];
+  let y = 0, z = 0;
+  for (let i = 0; i <= NV; i++) {
+    const v = i / NV;
+    const k = THREE.MathUtils.smoothstep(v, 0.62, 1.0);
+    const phi = lean + k * k * curl + bulge * 5 * Math.sin(Math.PI * Math.min(1, v / 0.75)) * (1 - k);
+    spine.push([y, z]); tang.push(phi);
+    const dv = L / NV;
+    y += Math.cos(phi) * dv; z += Math.sin(phi) * dv;
+  }
+  const width = v => {
+    const base = Math.pow(Math.sin(Math.PI * Math.min(1, v * 0.80 + 0.14)), 0.7) * (0.55 + 0.45 * Math.min(1, v * 2.2));
+    const tri = f => Math.abs((f % 1 + 1) % 1 - 0.5) * 2;          // 1 at integer phase, 0 half-way: sharp peaks, V notches
+    const lobe = 0.58 + 0.42 * (1 - Math.pow(tri(v * lobes + 0.35), 1.6));
+    const teeth = 0.90 + 0.10 * (1 - Math.pow(tri(v * lobes * 4 + 0.35), 1.3));
+    return Wm * base * lobe * teeth;
+  };
+  const pos = [], nrm = [], idx = [], uv = [];
+  for (let i = 0; i <= NV; i++) {
+    const v = i / NV, [sy, sz] = spine[i], phi = tang[i];
+    const w = width(v);
+    const ny = -Math.sin(phi), nz = Math.cos(phi);        // surface normal direction in the spine's frame
+    for (let j = 0; j <= NU; j++) {
+      const u = j / NU * 2 - 1;
+      const x = u * w;
+      // cupping + midrib ridge + fine veins
+      const veins = 0.0025 * Math.cos(u * 9 + v * 3) * Math.sin(Math.PI * v);
+      const lift = cup * u * u * w * 0.5 + 0.010 * Math.exp(-u * u * 30) * (1 - v) + veins;
+      const up = 0.45 * Math.abs(x) * (1 - 0.5 * v);                // edges swept upward like acanthus lobes
+      pos.push(x, sy + ny * lift + up * Math.cos(phi), sz + nz * lift + up * Math.sin(phi));
+      nrm.push(0, ny, nz);
+      uv.push(j / NU, v);
+    }
+  }
+  for (let i = 0; i < NV; i++) for (let j = 0; j < NU; j++) {
+    const a = i * (NU + 1) + j, b = a + 1, c = a + NU + 1, d = c + 1;
+    idx.push(a, c, b, b, c, d);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+const leafMat = new THREE.MeshStandardMaterial({ color: 0xf4f3f0, roughness: 0.82, metalness: 0, map: stone.map, side: THREE.DoubleSide });
+
+function volute(sign) {                     // log spiral ribbon, outer end flowing down into a stem
+  const pts = [];
+  const turns = 2.35, N = 140;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const a = -t * turns * Math.PI * 2 * sign;
+    const r = 0.095 * Math.exp(-1.05 * t * 2.2);     // 0.095 -> ~0.01
+    pts.push(new THREE.Vector3(r * Math.cos(a) * 1.0, r * Math.sin(a), 0.012 * t));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const g = new THREE.TubeGeometry(curve, 220, 0.022, 10, false);
+  // taper the tube radius towards the centre
+  const p = g.attributes.position; const n = 221, m = 11;
+  for (let i = 0; i < p.count; i++) {
+    const t = Math.floor(i / m) / (n - 1);
+    const c = curve.getPointAt(Math.min(1, t));
+    const k = 1.0 - 0.62 * t;
+    p.setXYZ(i, c.x + (p.getX(i) - c.x) * k, c.y + (p.getY(i) - c.y) * k, c.z + (p.getZ(i) - c.z) * k);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+function capital(side) {
+  const x = side * 1.14, top = -0.46;       // bell top (just under the abacus fillet)
+  const grp = new THREE.Group(); grp.position.set(x, 0, 0.02); cur.add(grp);
+  // bell: lathe, slight flare at top, 0.56 tall
+  const prof = [];
+  for (let i = 0; i <= 24; i++) {
+    const t = i / 24; const yy = top - 0.56 * t;
+    const r = 0.235 - 0.07 * t + 0.045 * Math.pow(1 - t, 6);
+    prof.push(new THREE.Vector2(r, yy));
+  }
+  prof.push(new THREE.Vector2(0.0, top - 0.56));
+  prof.unshift(new THREE.Vector2(0.0, top));
+  prof.reverse();
+  const bell = new THREE.LatheGeometry(prof, 48); bell.scale(1, 1, 0.82);
+  addSmooth(bell, grp);
+  // volutes at the corners, resting under the abacus
+  for (const s of [1, -1]) {
+    const v = volute(s); v.translate(s * 0.235, top - 0.135, 0.255); addSmooth(v, grp);
+    const disc = new THREE.CylinderGeometry(0.092, 0.092, 0.05, 32); disc.rotateX(Math.PI / 2); disc.translate(s * 0.235, top - 0.135, 0.215); addSmooth(disc, grp);
+    // stem from the bell up into the volute
+    const stem = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s * 0.12, top - 0.40, 0.08), new THREE.Vector3(s * 0.19, top - 0.30, 0.12), new THREE.Vector3(s * 0.30, top - 0.22, 0.20), new THREE.Vector3(s * 0.33, top - 0.14, 0.25)]), 24, 0.014, 8, false);
+    addSmooth(stem, grp);
+  }
+  // lower tier: three broad leaves across the front, side ones leaning outward
+  for (const o of [-0.15, 0, 0.15]) {
+    const l = leaf({ L: 0.36, Wm: 0.15, lobes: 4, curl: 1.75, bulge: 0.035, lean: -0.12, cup: 0.3 });
+    l.rotateZ(-o * 1.2); l.translate(o * 1.05, top - 0.555, 0.19 - Math.abs(o) * 0.15); addSmooth(l, grp, leafMat);
+  }
+  // upper tier: tall central leaf up to the fleuron, two side leaves curling under the volutes
+  const big = leaf({ L: 0.52, Wm: 0.165, lobes: 5, curl: 1.6, bulge: 0.04, lean: -0.08, cup: 0.28 });
+  big.translate(0, top - 0.52, 0.17); addSmooth(big, grp, leafMat);
+  for (const s of [1, -1]) {
+    const l = leaf({ L: 0.42, Wm: 0.13, lobes: 4, curl: 1.9, bulge: 0.04, lean: -0.05, cup: 0.3 });
+    l.rotateZ(-s * 0.30); l.translate(s * 0.15, top - 0.50, 0.15); addSmooth(l, grp, leafMat);
+  }
+  // caulicoli: small curled sprigs where the lower leaves meet
+  for (const o of [-0.085, 0.085]) {
+    const l = leaf({ L: 0.15, Wm: 0.045, lobes: 3, curl: 2.6, bulge: 0.02, lean: 0.1, cup: 0.4, segs: [14, 30] });
+    l.rotateZ(-o * 3); l.translate(o, top - 0.33, 0.27); addSmooth(l, grp, leafMat);
+  }
+  // astragal: torus + fillet, then the shaft stub
+  const tor = new THREE.TorusGeometry(0.19, 0.016, 10, 48); tor.rotateX(Math.PI / 2); tor.translate(0, top - 0.565, 0); addSmooth(tor, grp);
+  const fil = new THREE.CylinderGeometry(0.195, 0.195, 0.022, 48); fil.translate(0, top - 0.585, 0); addSmooth(fil, grp);
+  const shaft = new THREE.CylinderGeometry(0.182, 0.184, 0.10, 48); shaft.translate(0, top - 0.645, 0); addSmooth(shaft, grp);
+}
+for (const s of [1, -1]) {
+  const g = new THREE.Group(); g.position.set(s * 1.14, -0.305 - PIER_EXT, 0); g.scale.set(0.58, 0.72, 0.8); root.add(g);
+  cur = new THREE.Group(); cur.position.set(-s * 1.14, 0.345, 0); g.add(cur);
+  abacus(s); capital(s);
+}
+cur = null;
+
+// ---------------------------------------------------------------- post: GTAO for the crevices, then output
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(W, H, { samples: 4, type: THREE.HalfFloatType }));
+composer.addPass(new RenderPass(scene, camera));
+if (AO) {
+  const gtao = new GTAOPass(scene, camera, W, H);
+  gtao.output = GTAOPass.OUTPUT.Default;
+  gtao.blendIntensity = NIGHT ? 0.7 : 0.65;
+  gtao.updateGtaoMaterial({ radius: 0.09, distanceExponent: 1, thickness: 1, scale: 1, samples: 32, distanceFallOff: 1, screenSpaceRadius: false });
+  gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 4, radiusExponent: 1, rings: 2, samples: 16 });
+  composer.addPass(gtao);
+}
+composer.addPass(new OutputPass());
+
+let frames = 0;
+function tick() { composer.render(); if (++frames < 3) requestAnimationFrame(tick); }
+tick();
+</script>
+</body>
+</html>
