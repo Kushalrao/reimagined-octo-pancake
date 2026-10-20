@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,17 +11,23 @@
 		10B7CD830465EFCC6BA514F1 /* arch-night@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 1A2A6BB34356286A3DE1706E /* arch-night@3x.png */; };
 		21B407FBBFDB50E66F9444CC /* tile-live.png in Resources */ = {isa = PBXBuildFile; fileRef = 19C5F78583165B4C563BC1B0 /* tile-live.png */; };
 		2E8DDBC179AE7A04BD93F0C1 /* tile-seat-4.png in Resources */ = {isa = PBXBuildFile; fileRef = EB99918E1ADE3B9CA21E549A /* tile-seat-4.png */; };
+		3176CD24BF5862321AF5C008 /* tile-seat-4.lava in Resources */ = {isa = PBXBuildFile; fileRef = B2A117B9F4B70C95FD59874B /* tile-seat-4.lava */; };
 		35B8657813001311717F7451 /* tile-seat-2.png in Resources */ = {isa = PBXBuildFile; fileRef = 3917300DF6FA59E76FBD2227 /* tile-seat-2.png */; };
+		3983E9FD812EBC9371ED0E59 /* LavaIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD7569F2845C00279C22268 /* LavaIconView.swift */; };
 		3C4F5BAC8947F5F9981ABDEE /* placeholder-sunset@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D20CE4F682C5C24E1B55D55F /* placeholder-sunset@2x.png */; };
 		3CF3CE150955CB8A587AAFF0 /* LightTextTrial-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = CF37B37AC5CB1AF768D8EC85 /* LightTextTrial-Regular.otf */; };
 		46B6E72C3132D8241CD39D19 /* LightTextTrial-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 58E8EB1A82360B47BE38C539 /* LightTextTrial-Light.otf */; };
 		484788BFE8AA1D946FD47C8C /* placeholder-night@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 09B4923CC93CA8825E23AB8B /* placeholder-night@2x.png */; };
 		49EC984D06D2681A6DBEFDD5 /* TrainWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA44C647D9F87110246DDDC /* TrainWebView.swift */; };
 		68BDF8B76CA30A84BA5E5F21 /* web in Resources */ = {isa = PBXBuildFile; fileRef = F88FD2E30CC2765C83D4A4BF /* web */; };
+		783241D53C48FEA8AF55E0DF /* LavaClip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57559D16F59486081685C0C8 /* LavaClip.swift */; };
 		7BF6B88EA4E794B884E8B4B0 /* tile-seat-5.png in Resources */ = {isa = PBXBuildFile; fileRef = D9388569BB74182BD261720C /* tile-seat-5.png */; };
+		84BA457FF62EF8CCD337D789 /* tile-seat-2.lava in Resources */ = {isa = PBXBuildFile; fileRef = F3E13F3C21FDB6A36FD7B7EE /* tile-seat-2.lava */; };
+		858365ACC121606AB7BB0AA3 /* tile-seat-5.lava in Resources */ = {isa = PBXBuildFile; fileRef = F2A969895DB2356992B0DAAF /* tile-seat-5.lava */; };
 		85EF130C6F31EB5125F04841 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47AEE305E8FF360657ED2A5B /* ContentView.swift */; };
 		885F47086AF4497D6721D966 /* arch-day@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = FC227BC83BE65FC3B3B7B965 /* arch-day@3x.png */; };
 		9165386A5A66FE935DB0280A /* placeholder-day@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2E7F3DA2C4207D92CF04A003 /* placeholder-day@2x.png */; };
+		9A6BB6176BE08ACCB478B382 /* tile-seat-1.lava in Resources */ = {isa = PBXBuildFile; fileRef = 8FADDB2EE9E3FFDCFA3B4F8E /* tile-seat-1.lava */; };
 		A1E6430BE0B9B9CD50777408 /* placeholder-evening@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B7FFDADF60BA518E70F0F5E /* placeholder-evening@2x.png */; };
 		AA375D6F592D723DDC84A819 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2353496A62BEC103B387906F /* Assets.xcassets */; };
 		AF0D76887042C7D781FC79BE /* StationCardApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 931D28208BB366BC6067946C /* StationCardApp.swift */; };
@@ -30,6 +36,8 @@
 		D56639BBFA89296F31C986D1 /* arch-sunset@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7B0E5816B8D1E4C7CFE371E3 /* arch-sunset@3x.png */; };
 		E1A8A279D72C146A04843DD3 /* arch-evening@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F8C66B808AF36256E7A3BB22 /* arch-evening@3x.png */; };
 		E1C414200E12E816E52EA66F /* Inter.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8101512EE5ED4CBE449CAF6E /* Inter.ttf */; };
+		E593A8FF3B4B5DF1402AD92C /* tile-live.lava in Resources */ = {isa = PBXBuildFile; fileRef = C1E71478CC962727F4EB4B1D /* tile-live.lava */; };
+		EC89E5D36095B55C2D19C042 /* tile-seat-6.lava in Resources */ = {isa = PBXBuildFile; fileRef = 819E9BA543E679E4552F18F7 /* tile-seat-6.lava */; };
 		EE7079EF1A1307333C0DCDFC /* LightTextTrial-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4C3479B5524CDFCE51160948 /* LightTextTrial-Bold.otf */; };
 /* End PBXBuildFile section */
 
@@ -43,19 +51,27 @@
 		3917300DF6FA59E76FBD2227 /* tile-seat-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tile-seat-2.png"; sourceTree = "<group>"; };
 		47AEE305E8FF360657ED2A5B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4C3479B5524CDFCE51160948 /* LightTextTrial-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LightTextTrial-Bold.otf"; sourceTree = "<group>"; };
+		4CD7569F2845C00279C22268 /* LavaIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LavaIconView.swift; sourceTree = "<group>"; };
+		57559D16F59486081685C0C8 /* LavaClip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LavaClip.swift; sourceTree = "<group>"; };
 		58E8EB1A82360B47BE38C539 /* LightTextTrial-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LightTextTrial-Light.otf"; sourceTree = "<group>"; };
-		7A1F2C03F5286CE163E2B899 /* StationCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StationCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A1F2C03F5286CE163E2B899 /* StationCard.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StationCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B0E5816B8D1E4C7CFE371E3 /* arch-sunset@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arch-sunset@3x.png"; sourceTree = "<group>"; };
 		7B7FFDADF60BA518E70F0F5E /* placeholder-evening@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "placeholder-evening@2x.png"; sourceTree = "<group>"; };
 		8101512EE5ED4CBE449CAF6E /* Inter.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Inter.ttf; sourceTree = "<group>"; };
+		819E9BA543E679E4552F18F7 /* tile-seat-6.lava */ = {isa = PBXFileReference; path = "tile-seat-6.lava"; sourceTree = "<group>"; };
 		87191338D1F2FD769A5C7BDB /* HomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeScreen.swift; sourceTree = "<group>"; };
+		8FADDB2EE9E3FFDCFA3B4F8E /* tile-seat-1.lava */ = {isa = PBXFileReference; path = "tile-seat-1.lava"; sourceTree = "<group>"; };
 		931D28208BB366BC6067946C /* StationCardApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StationCardApp.swift; sourceTree = "<group>"; };
+		B2A117B9F4B70C95FD59874B /* tile-seat-4.lava */ = {isa = PBXFileReference; path = "tile-seat-4.lava"; sourceTree = "<group>"; };
 		BEA44C647D9F87110246DDDC /* TrainWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainWebView.swift; sourceTree = "<group>"; };
+		C1E71478CC962727F4EB4B1D /* tile-live.lava */ = {isa = PBXFileReference; path = "tile-live.lava"; sourceTree = "<group>"; };
 		CF37B37AC5CB1AF768D8EC85 /* LightTextTrial-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LightTextTrial-Regular.otf"; sourceTree = "<group>"; };
 		D20CE4F682C5C24E1B55D55F /* placeholder-sunset@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "placeholder-sunset@2x.png"; sourceTree = "<group>"; };
 		D9388569BB74182BD261720C /* tile-seat-5.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tile-seat-5.png"; sourceTree = "<group>"; };
 		EB99918E1ADE3B9CA21E549A /* tile-seat-4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tile-seat-4.png"; sourceTree = "<group>"; };
 		EDA07E36D34B5964F4CB45A3 /* tile-seat-6.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "tile-seat-6.png"; sourceTree = "<group>"; };
+		F2A969895DB2356992B0DAAF /* tile-seat-5.lava */ = {isa = PBXFileReference; path = "tile-seat-5.lava"; sourceTree = "<group>"; };
+		F3E13F3C21FDB6A36FD7B7EE /* tile-seat-2.lava */ = {isa = PBXFileReference; path = "tile-seat-2.lava"; sourceTree = "<group>"; };
 		F88FD2E30CC2765C83D4A4BF /* web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = web; sourceTree = SOURCE_ROOT; };
 		F8C66B808AF36256E7A3BB22 /* arch-evening@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arch-evening@3x.png"; sourceTree = "<group>"; };
 		FC227BC83BE65FC3B3B7B965 /* arch-day@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arch-day@3x.png"; sourceTree = "<group>"; };
@@ -102,6 +118,7 @@
 				09B4923CC93CA8825E23AB8B /* placeholder-night@2x.png */,
 				D20CE4F682C5C24E1B55D55F /* placeholder-sunset@2x.png */,
 				55185EC171407C95628D492C /* figma */,
+				D044C9B92E79423297EFD0EB /* lava */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -114,11 +131,26 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		D044C9B92E79423297EFD0EB /* lava */ = {
+			isa = PBXGroup;
+			children = (
+				C1E71478CC962727F4EB4B1D /* tile-live.lava */,
+				8FADDB2EE9E3FFDCFA3B4F8E /* tile-seat-1.lava */,
+				F3E13F3C21FDB6A36FD7B7EE /* tile-seat-2.lava */,
+				B2A117B9F4B70C95FD59874B /* tile-seat-4.lava */,
+				F2A969895DB2356992B0DAAF /* tile-seat-5.lava */,
+				819E9BA543E679E4552F18F7 /* tile-seat-6.lava */,
+			);
+			path = lava;
+			sourceTree = "<group>";
+		};
 		F6E59CB87402E26A1442EB8E /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				47AEE305E8FF360657ED2A5B /* ContentView.swift */,
 				87191338D1F2FD769A5C7BDB /* HomeScreen.swift */,
+				57559D16F59486081685C0C8 /* LavaClip.swift */,
+				4CD7569F2845C00279C22268 /* LavaIconView.swift */,
 				931D28208BB366BC6067946C /* StationCardApp.swift */,
 				BEA44C647D9F87110246DDDC /* TrainWebView.swift */,
 			);
@@ -156,6 +188,7 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					74B512D0B1019E96419171C5 = {
+						DevelopmentTeam = D76GU59P59;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -170,6 +203,7 @@
 			);
 			mainGroup = 280ADD1E859D881E57D6EF75;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -196,11 +230,17 @@
 				A1E6430BE0B9B9CD50777408 /* placeholder-evening@2x.png in Resources */,
 				484788BFE8AA1D946FD47C8C /* placeholder-night@2x.png in Resources */,
 				3C4F5BAC8947F5F9981ABDEE /* placeholder-sunset@2x.png in Resources */,
+				E593A8FF3B4B5DF1402AD92C /* tile-live.lava in Resources */,
 				21B407FBBFDB50E66F9444CC /* tile-live.png in Resources */,
+				9A6BB6176BE08ACCB478B382 /* tile-seat-1.lava in Resources */,
 				D2786784A9C1739BB7ABA59E /* tile-seat-1.png in Resources */,
+				84BA457FF62EF8CCD337D789 /* tile-seat-2.lava in Resources */,
 				35B8657813001311717F7451 /* tile-seat-2.png in Resources */,
+				3176CD24BF5862321AF5C008 /* tile-seat-4.lava in Resources */,
 				2E8DDBC179AE7A04BD93F0C1 /* tile-seat-4.png in Resources */,
+				858365ACC121606AB7BB0AA3 /* tile-seat-5.lava in Resources */,
 				7BF6B88EA4E794B884E8B4B0 /* tile-seat-5.png in Resources */,
+				EC89E5D36095B55C2D19C042 /* tile-seat-6.lava in Resources */,
 				B220A489771150272F9FAB70 /* tile-seat-6.png in Resources */,
 				68BDF8B76CA30A84BA5E5F21 /* web in Resources */,
 			);
@@ -215,6 +255,8 @@
 			files = (
 				85EF130C6F31EB5125F04841 /* ContentView.swift in Sources */,
 				0470D42CD5B7D62B61E6C33E /* HomeScreen.swift in Sources */,
+				783241D53C48FEA8AF55E0DF /* LavaClip.swift in Sources */,
+				3983E9FD812EBC9371ED0E59 /* LavaIconView.swift in Sources */,
 				AF0D76887042C7D781FC79BE /* StationCardApp.swift in Sources */,
 				49EC984D06D2681A6DBEFDD5 /* TrainWebView.swift in Sources */,
 			);

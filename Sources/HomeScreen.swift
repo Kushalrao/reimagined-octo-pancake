@@ -39,7 +39,7 @@ struct HomeScreen: View {
 
                 // 3 × 2 tile grid (171:256): 360.667 × 177 at (15, 121), gaps 11 × 13
                 ForEach(0..<HomeTile.all.count, id: \.self) { i in
-                    HomeTileView(tile: HomeTile.all[i], s: s)
+                    HomeTileView(tile: HomeTile.all[i], index: i, s: s)
                         .frame(width: Self.tileSize.width * s, height: Self.tileSize.height * s)
                         .offset(Self.tileOrigin(i, s: s))
                 }
@@ -99,24 +99,33 @@ struct HomeTile {
     ]
 }
 
+/// The icon is a `.lava` clip (Resources/lava/<image>.lava, a card turn of the Figma render made with
+/// lava-encode.py). As on airbnb.com: it rests on its poster, every tile plays its entry clip once on load,
+/// staggered (400 ms + 80 ms per tile), and a tap replays it 150 ms later. The Figma frame, crop and offset are unchanged.
 struct HomeTileView: View {
     let tile: HomeTile
+    let index: Int
     let s: CGFloat
+    @State private var play = 0
+    @State private var introDone = false
+    static let introDelayMs = 400, introStaggerMs = 80, selectDelayMs = 150
 
     var body: some View {
-        Button {} label: {
+        Button {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.selectDelayMs)) { play += 1 }
+        } label: {
             GeometryReader { g in
                 ZStack(alignment: .topLeading) {
                     Color(hex: 0xFAFAF8)
                     Group {
                         if let crop = tile.crop {
-                            BundleImage.view(tile.image).resizable()
+                            LavaIconView(name: tile.image, play: play)
                                 .frame(width: crop.size.width * s, height: crop.size.height * s)
                                 .offset(x: crop.offset.width * s, y: crop.offset.height * s)
                                 .frame(width: tile.size.width * s, height: tile.size.height * s, alignment: .topLeading)
                                 .clipped()
                         } else {
-                            BundleImage.view(tile.image).resizable()
+                            LavaIconView(name: tile.image, play: play)
                                 .frame(width: tile.size.width * s, height: tile.size.height * s)
                         }
                     }
@@ -134,6 +143,11 @@ struct HomeTileView: View {
         .buttonStyle(.plain)
         .clipShape(RoundedRectangle(cornerRadius: 27 * s, style: .continuous))
         .shadow(color: .black.opacity(0.04), radius: 52 * s, y: 2 * s)
+        .onAppear {
+            guard !introDone else { return }
+            introDone = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.introDelayMs + index * Self.introStaggerMs)) { play += 1 }
+        }
     }
 }
 

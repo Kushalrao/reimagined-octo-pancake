@@ -37,10 +37,12 @@ Sources/
   ContentView.swift      DayPhase (clock rule), Cards (the card list), StationCard view, CardsListView (old, unused)
   HomeScreen.swift       Figma home screen: header, tiles, scrolling card stack; BundleImage helper; Color(hex:)
   TrainWebView.swift     TrainWebViewHost (one WKWebView per card, capped), TrainWebView, app:// scheme handler
+  LavaClip.swift         .lava decoder (frames composed to CGImages); LavaIconView.swift  poster + play-once view
 Resources/
   arch-<phase>@3x.png          stone arch, transparent, 1056×1001 (rendered from tools/arch/arch.html)
   placeholder-<phase>@2x.png   first frame of the scene, transparent, 640×400 (shown until the page draws)
-  figma/tile-*.png, carvaan-logo   home-screen assets exported from Figma
+  figma/tile-*.png, carvaan-logo   home-screen assets exported from Figma (tile PNGs are the lava sources)
+  lava/tile-*.lava                 animated tile icons (see §4)
   Inter.ttf, LightTextTrial-*.otf  fonts (Inter is a variable font with named instances; title font is
                                    PostScript name "BusinessSerifTrial-TextRegular")
 web/
@@ -88,6 +90,15 @@ Implemented from Figma node 171:218 with every value from the design (390 pt wid
   earlier cards list used). The whole screen is a `ScrollView`; content height is computed from the card
   count. Off-screen cards pause their render loop (`isActive && isVisible`).
 - Figma SVG exports use CSS `var()` fills that Apple can't render — inline the hex when exporting.
+- **Tile icons are `.lava` clips** (`Resources/lava/<tile>.lava`, 192×192, 36 frames @ 30 fps, 16 px cells),
+  made from the Figma renders with `~/airbnbIcons/iconstrials/lava-encode.py --axis y --frames 36 --size 192
+  --cell 16` (a card turn about the vertical axis; renders on white are keyed automatically).
+  `Sources/LavaClip.swift` decodes the container (RIFF → PNG keyframe + atlas → FRAM patch table, raw
+  DEFLATE via Compression) and composes every frame into a CGImage once; `Sources/LavaIconView.swift`
+  shows frame 0 as the poster and plays the clip once per `play` change with a CADisplayLink (Reduce
+  Motion → poster only). `HomeTileView` follows the Airbnb pattern from the write-up: entry clip once on
+  appear, staggered 400 ms + 80 ms × tile index, replay 150 ms after a tap. Figma frame/crop/offset unchanged;
+  the original PNGs stay in `Resources/figma/` as the encoder's source.
 
 ## 5. The train scene (`web/index.html`)
 
@@ -206,12 +217,9 @@ frame changes (stage size, track, furniture). Needs `web/` served on :8768.
 
 ## 13. Open items / next steps
 
-1. **Lava icons for the home tiles** — Kushal asked to "replace main icons to use our lava tech". Two
-   decisions are pending from them: (a) the motion source — flip the flat Figma PNGs with the encoder's
-   Y-axis card turn, or make real turnaround renders like the chair sheet; (b) when it plays — Airbnb's
-   pattern is a staggered entry twirl on load and a replay on tap, still poster otherwise. Plan: a small
-   Swift `.lava` decoder (RIFF → PNG keyframe + atlas → compose each frame once → play with a display
-   link), swapped into `HomeTileView` with Figma sizes/offsets unchanged. Ask before choosing.
+1. **Lava icons** are built (see §4) but not yet reviewed by Kushal on device: the card-turn motion from
+   the flat Figma renders, the 400 ms + 80 ms stagger, the 150 ms tap replay. If they want real 3D turns,
+   the route is turnaround renders → `lava-slice.py` → `lava-encode.py` (sequence mode), same player.
 2. Kushal has not yet confirmed on-device: the arch shadow, the longer piers, the 24 liveries, the
    scrolling card stack, the 4-host cap.
 3. The `station=1` platform scene exists but has no card and no placeholders.
